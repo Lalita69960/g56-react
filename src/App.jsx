@@ -1,23 +1,26 @@
+import AlertMessage from "./2_lecture/AlertMessage"
 
-import Content from "./Content"
-import DynamicNavbar from "./DynamicNavbar"
-import Header from "./Header"
-import Navbar from "./Navbar"
-import StudentTable from "./practice/StudentTable"
+
+import { FaExclamationTriangle,FaInfoCircle } from "react-icons/fa"
 
 function App() {
 
   return (
     <>
+      <AlertMessage 
+      alertType="alert-success"
+      message="Operation was Successful!"/>
 
-    <StudentTable/>
+      
+      <AlertMessage 
+      alertType="alert-danger"
+      icon={<FaExclamationTriangle/>}
+      message="Operation has Failed"/>
 
-
-    {/* 
-    <DynamicNavbar/>
-    <Header/>
-    <Content/>
-    */}
+      <AlertMessage 
+      alertType="alert-info"
+      icon={<FaInfoCircle/>}
+      message="System is up and running "/>
     </>
 
   )
