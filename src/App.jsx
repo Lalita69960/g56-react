@@ -5,12 +5,20 @@ import Pricing from "./2_lecture/Pricing";
 
 import { FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 import Counter from "./2_lecture/Counter";
+import LikeButtons from "./2_lecture/LikeButtons";
 
 function App() {
   return (
     <>
 
-    <Counter/>
+      <LikeButtons/>
+
+
+      {/**
+        <Counter/>
+
+      */}
+
 
 
       {/**
