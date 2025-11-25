@@ -1,138 +1,169 @@
-import React from "react";
-import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import React, {useEffect, useState} from "react";
+import {FaCheck, FaTimes, FaTrash} from "react-icons/fa";
+import AlertMessage from "./AlertMessage.jsx";
+import axios from "axios";
+import InvitationForm from "./InvitationForm.jsx";
 
+
+export const apiEndpoint = "http://localhost:8080/api/invitations";
 
 const InvitationApp = () => {
 
-  return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4">Your Invitations</h2>
-      {/* Alert area */}
-      <div className={`alert alert-success d-flex justify-content-between align-items-center`} role="alert">
-        <div>Alert Message</div>
-        <button type="button" className="btn-close" aria-label="Close"/>
-      </div>
+    const [invitations, setInvitations] = useState([]);
 
-      {/* Add Invitation Form */}
-      <div className="mb-4">
-        <h4>Create a New Invitation</h4>
-        <form>
-          <div className="mb-3">
-            <input
-                type="text"
-                className={`form-control is-invalid`}
-                placeholder="Title"
-            />
-            <div className="invalid-feedback">error message</div>
-          </div>
+    const [alert, setAlert] = useState(null); // { variant: "success"|"danger"|..., message: string
 
-          <div className="mb-3">
-            <input
-                type="date"
-                className={`form-control is-invalid`}
-            />
-            <div className="invalid-feedback">error message</div>
-          </div>
+    useEffect(() => {
+        fetchAllInvitations();
+    }, []);
 
-          <div className="mb-3">
-            <input
-                type="time"
-                className={`form-control is-invalid`}
-            />
-              <div className="invalid-feedback">errors message</div>
-          </div>
 
-          <div className="mb-3">
-            <input
-                type="text"
-                className={`form-control is-invalid`}
-                placeholder="Location"
-            />
-            <div className="invalid-feedback">errors message</div>
-          </div>
+    const fetchAllInvitations = async () => {
+        console.log("Step1: Starting to fetch invitations...");
+        await axios.get(apiEndpoint)
+            .then(
+                (response) => {
+                    console.log("Step2: Response received.", response);
 
-          <button type="submit" className="btn btn-primary">
-            Add Invitation
-          </button>
-        </form>
-      </div>
 
-        {/* Invitations Table */}
-      <table className="table table-bordered table-striped">
-        <thead className="thead-dark">
-        <tr>
-          <th>#</th>
-          <th>Invitation</th>
-          <th>Date</th>
-          <th>Time</th>
-          <th>Location</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>1</td>
-          <td>Birthday Party</td>
-          <td>2024-03-25</td>
-          <td>18:00</td>
-          <td>Central Park</td>
-          <td>
-                <span className="badge bg-warning text-dark">
-                  Pending
-                </span>
-          </td>
-          <td>
-            <button className="btn btn-sm btn-success me-2">
-              <FaCheck /> Accept
-            </button>
-            <button className="btn btn-sm btn-danger me-2">
-              <FaTimes /> Decline
-            </button>
-            <button className="btn btn-sm btn-secondary">
-              <FaTrash /> Remove
-            </button>
-          </td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Team Meeting</td>
-          <td>2024-03-26</td>
-          <td>10:00</td>
-          <td>Conference Room</td>
-          <td>
-                <span className="badge bg-success">
-                  Accepted
-                </span>
-          </td>
-          <td>
-            <button className="btn btn-sm btn-secondary">
-              <FaTrash /> Remove
-            </button>
-          </td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Dinner Party</td>
-          <td>2024-03-27</td>
-          <td>19:30</td>
-          <td>Italian Restaurant</td>
-          <td>
-                <span className="badge bg-danger">
-                  Declined
-                </span>
-          </td>
-          <td>
-            <button className="btn btn-sm btn-secondary">
-              <FaTrash /> Remove
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+                    if (response.status === 200) {
+                        console.log("Response: ", response.data);
+                        setInvitations(response.data);
+                        console.log(
+                            "Step3: Invitations successfully fetched and state updated."
+                        );
+                    } else {
+                        console.error("Unexpected response status:", response.status);
+                    }
+                }
+            ).catch((error) => {
+                console.error("Error occurred during the API call.");
 
-    </div>
-  );
+            })
+        console.log("Step4: Finished fetching invitations.");
+    }
+
+    const updateInvitationStatus = async (id, newStatus) => {
+
+        //http://localhost:8080/api/invitations/1?status=accepted
+
+        try {
+            const response = await axios.put(`${apiEndpoint}/${id}?status=${newStatus}`);
+
+            if (response.status === 204) {
+                fetchAllInvitations();
+                console.log("Invitation status updated successfully.");
+                setAlert({variant: "success", message:
+                        newStatus === "accepted" ?
+                            "Invitation Accepted."
+                            : newStatus === "declined"
+                                ? "Invitation declined."
+                                : "Invitation updated."})
+            }
+        }catch (error){
+            console.error("Error updating invitation:", error);
+        }
+
+    };
+
+    const deleteInvitation = async (id) => {
+
+        try{
+            const response = await axios.delete(`${apiEndpoint}/${id}`);
+            if (response.status === 204){
+                fetchAllInvitations();
+                console.log("Invitation deleted successfully.");
+                setAlert({ variant: "success", message: "Invitation removed." });
+            }
+        }catch(error){
+            console.error("Error deleting invitation:", error);
+        }
+    };
+
+    const handleInvitationAdded = (msg = "invitation Was Successful!") => {
+        fetchAllInvitations();
+        setAlert({ variant: "success", msg })
+    }
+
+
+
+    return (
+        <div className="container mt-5">
+            <h2 className="text-center mb-4">Your Invitations</h2>
+            {/* Alert area*/}
+
+            {
+                alert && (
+                    <AlertMessage variant={alert.variant} onClose={() => setAlert(null)} autoClose={3000}>
+                        {alert.message}
+                    </AlertMessage>
+                )
+            }
+
+
+            {/* Add Invitation Form */}
+        <InvitationForm onInvitationAdded={handleInvitationAdded} />
+
+            {/* Invitations Table */}
+            <table className="table table-bordered table-striped">
+                <thead className="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Invitation</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {
+                    invitations.map((invitation, index) => (
+                        <tr key={invitation.id}>
+                            <td>{index + 1}</td>
+                            <td>{invitation.title}</td>
+                            <td>{invitation.date}</td>
+                            <td>{invitation.time}</td>
+                            <td>{invitation.location}</td>
+
+                            <td>
+                  <span
+                      className={`badge ${invitation.status === "accepted" ? "bg-success" : invitation.status === "declined" ? "bg-danger" : "bg-warning text-dark"}`}>
+                    {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
+                  </span>
+                            </td>
+                            <td>
+
+                                {invitation.status === "pending" && (
+                                   <>
+                                       <button className="btn btn-sm btn-success me-2"
+                                       onClick={() => updateInvitationStatus(invitation.id, "accepted")}>
+                                           <FaCheck/> Accept
+                                       </button>
+                                       <button className="btn btn-sm btn-danger me-2"
+                                               onClick={() => updateInvitationStatus(invitation.id, "declined")}>
+                                           <FaTimes/> Decline
+                                       </button>
+                                   </>
+                                )}
+
+                                <button className="btn btn-sm btn-secondary"
+                                onClick={()=> deleteInvitation(invitation.id)}>
+                                    <FaTrash/> Remove
+                                </button>
+
+                            </td>
+                        </tr>
+                    ))
+                }
+
+                </tbody>
+            </table>
+
+        </div>
+    );
 };
 
 export default InvitationApp;
