@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Routes, Route, Link, NavLink, Outlet, useNavigate, useLocation} from "react-router-dom";
 
 const AppRouter = () => {
@@ -11,12 +11,21 @@ const AppRouter = () => {
             <Route path="/contact" element={<Contact/>}/>
             <Route path="/contact" element={<Contact/>}/>
 
+
+            {/** Nested Routes*/}
             <Route path="/dashboard" element={<Dashboard/>}>
                 <Route index element={<DashboardHome/>}/>
                 <Route path="users" element={<ManageUsers/>}/>
                 <Route path="invitations" element={<Invitations/>}/>
-                <Route path="settings" element={<Settings/>}/>
+
+                <Route element={<ProtectedRoute />}>
+                    <Route path="settings" element={<Settings/>}/>
+                </Route>
+
+                <Route path="*" element={<NotFound/>}/>
             </Route>
+
+
 
             <Route path="*" element={<NotFound/>}/>
         </Routes>
@@ -49,12 +58,15 @@ const Home = () => {
                 >Go to About
                 </button>
 
-                <Link className="btn btn-primary" to="/dashboard" state={{role: "ADMIN"}}>
+                <button
+                    onClick={() => navigate("/dashboard", {state: {role: 'ADMIN'}})}
+                    className="btn btn-primary"
+                >
                     Go to Admin Dashboard
-                </Link>
+                </button>
 
                 <Link className="btn btn-primary" to="/dashboard" state={{role: "USER"}}>
-                    Go to USER Dashboard
+                    Go to User Dashboard
                 </Link>
             </div>
 
@@ -105,18 +117,21 @@ const Dashboard = () => {
                             <NavLink
                                 to="/dashboard"
                                 className="btn btn-outline-secondary w-100 mb-2"
+                                state={location.state} // Preserve state
                             >
                                 Dashboard Home
                             </NavLink>
                             <NavLink
                                 to="/dashboard/users"
                                 className="btn btn-outline-success w-100 mb-2"
+                                state={location.state} // Preserve state
                             >
                                 Manage Users
                             </NavLink>
                             <NavLink
                                 to="/dashboard/invitations"
                                 className="btn btn-outline-success w-100 mb-2"
+                                state={location.state} // Preserve state
                             >
                                 Invitations
                             </NavLink>
@@ -124,6 +139,7 @@ const Dashboard = () => {
                             {location.state?.role === "ADMIN" &&  ( <NavLink
                                 to="/dashboard/settings"
                                 className="btn btn-outline-success w-100 mb-2"
+                                state={location.state} // Preserve state
                             >
                                 Settings
                             </NavLink>)}
@@ -148,6 +164,24 @@ const DashboardHome = () => <h2>Welcome to the Dashboard!</h2>;
 const ManageUsers = () => <h2>Manage Users Page</h2>;
 const Invitations = () => <h2>Invitations Page</h2>;
 const Settings = () => <h2>Settings Page</h2>;
+
+
+const ProtectedRoute = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.role !== 'ADMIN') {
+            navigate('/dashboard', { replace: true }); // Redirect to dashboard if not admin, and replace true means: it won't add a new entry in the history stack
+        }
+    }, [location.state, navigate]);
+
+    if (location.state?.role !== 'ADMIN') {
+        return null;
+    }
+
+    return <Outlet />;
+};
 
 
 export default AppRouter;
