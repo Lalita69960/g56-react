@@ -23,7 +23,6 @@ const Home = () => {
         </div>
     )
 };
-
 const About = () => {
     return (
         <div className="container">
@@ -32,7 +31,6 @@ const About = () => {
         </div>
     );
 }
-
 const Contact = () => {
     return (
         <div className="container">
@@ -41,7 +39,6 @@ const Contact = () => {
         </div>
     );
 }
-
 const NotFound = () => {
     return(
         <div className="container text-center">

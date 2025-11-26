@@ -15,12 +15,14 @@ import InvitationApp from "./4_lecture/InvitationApp.jsx";
 
 import {BrowserRouter} from "react-router-dom";
 import AppRouter from "./4_lecture/router/AppRouter.jsx";
+import AppNavbar from "./4_lecture/router/AppNavbar.jsx";
 
 function App() {
     return (
         <>
 
             <BrowserRouter>
+                <AppNavbar/>
                 <AppRouter/>
             </BrowserRouter>
 
